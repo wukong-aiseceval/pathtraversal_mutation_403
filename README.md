@@ -1,4 +1,3 @@
-![Ringer Logo](https://github.com/Lif-Platforms/Ringer-Client-Windows/blob/main/.github/Ringerlogo.png)
 # Lif Authuntication Server
 Lif Auth Server is a server for validating logins for Lif Accounts
 
