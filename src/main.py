@@ -1,9 +1,7 @@
 import asyncio
 import websockets
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives import hashes
 import json
+import rsa
 import utils.db_interface as database
 import utils.password_hasher as hasher
 
@@ -21,23 +19,15 @@ async def websocket_server(websocket, path):
     async for message in websocket:
         # Checks if the client requested a handshake
         if message == "HANDSHAKE":
-            # Generate an RSA key pair
-            client.private_key = rsa.generate_private_key(
-                public_exponent=65537,
-                key_size=2048
-            )
+            # Generate a rsa key pair
+            pub_key, priv_key = rsa.newkeys(1024)
 
-            # Extract the public key
-            client.public_key = client.private_key.public_key()
-
-            # Serialize the public key in PEM format
-            pem_public_key = client.public_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            )
+            # Exports the keys to clint data class
+            client.public_key = pub_key.save_pkcs1("PEM")
+            client.private_key = priv_key.save_pkcs1("PEM")
 
             # Send the public key to the client
-            await websocket.send(pem_public_key.decode())
+            await websocket.send(client.public_key)
 
         # Checks if the client is trying to log in
         if message == "USER_LOGIN":
@@ -47,18 +37,13 @@ async def websocket_server(websocket, path):
             # Waits for the client to send credentials
             encrypted_credentials = await websocket.recv()
 
-            # Decrypt the credentials using the server's private key
-            decrypted_credentials = client.private_key.decrypt(
-                encrypted_credentials,
-                padding.OAEP(
-                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                    algorithm=hashes.SHA256(),
-                    label=None
-                )
-            )
+            print(encrypted_credentials)
 
-            # Save the credentials as a single variable
-            credentials = decrypted_credentials.decode()
+            # Loads the private key from client data
+            loaded_private_key = rsa.PrivateKey.load_pkcs1(client.private_key)
+
+            # Decrypt the credentials using the server's private key
+            credentials = rsa.decrypt(encrypted_credentials.encode(), loaded_private_key)
             
             # Loads the credentials from json
             loaded_credentials = json.loads(credentials)
@@ -81,14 +66,7 @@ async def websocket_server(websocket, path):
                 token = database.retrieve_user_token(username)
 
                 # Encrypts the token with the clients public key
-                encrypted_token = client_public_key.encrypt(
-                    token.encode(),
-                    padding.OAEP(
-                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                        algorithm=hashes.SHA256(),
-                        label=None
-                    )
-                )
+                encrypted_token = False
 
                 # Sends token to the client
                 await websocket.send(encrypted_token) 
