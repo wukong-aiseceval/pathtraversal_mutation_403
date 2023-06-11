@@ -72,7 +72,7 @@ def retrieve_user_token(username):
     # Gets the token from the database
     for item in items:
         database_username = item[0]
-        database_token = item[0]
+        database_token = item[3]
 
         if username == database_username:
             found_token = database_token
