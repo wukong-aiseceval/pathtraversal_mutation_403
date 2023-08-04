@@ -4,6 +4,7 @@ import utils.password_hasher as hasher
 from flask import send_file
 from flask_cors import CORS, cross_origin
 import os
+from flask import Flask, send_from_directory
 
 app = Flask(__name__)
 CORS(app)
@@ -12,6 +13,10 @@ CORS(app)
 @app.route('/')
 def home():
     return 'Welcome to Lif Auth Server!'
+
+@app.route('/.well-known/acme-challenge/<filename>')
+def acme_challenge(filename):
+    return send_from_directory('.well-known/acme-challenge', filename)
 
 @app.route('/login/<username>/<password>')
 @cross_origin()
