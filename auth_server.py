@@ -5,6 +5,7 @@ from flask import send_file
 from flask_cors import CORS, cross_origin
 import os
 from flask import Flask, send_from_directory
+import utils.email_checker as email_interface
 
 app = Flask(__name__)
 CORS(app)
@@ -76,6 +77,31 @@ def get_banner(username):
     else: 
         # Returns default image if none is uploaded
          return send_file('user_images/banner/default.png', mimetype='image/gif')
+    
+@app.route('/create_account/<username>/<email>/<password>')
+def create_account(username, email, password):
+    # Check username usage
+    username_status = database.check_username(username)
+    if username_status == True:
+        return {"status": "unsuccessful", "reason": "Username Already in Use!"}
+    
+    # Check email usage
+    email_status = database.check_email(email)
+    if email_status ==  True:
+        return {"status": "unsuccessful", "reason": "Email Already in Use!"}
+    
+    # Check if email is valid
+    email_isValid = email_interface.is_valid_email(email)
+    if email_isValid == False:
+        return {"status": "unsuccessful", "reason": "Email is Invalid!"}
+    
+    # Hash user password
+    password_hash = hasher.get_hash_gen_salt(password)
+
+    # Create user account
+    database.create_account(username=username, password=password_hash['password'], email=email, password_salt=password_hash['salt'])
+
+    return {"status": "ok"}
 
 if __name__ == '__main__':
     app.run(debug=True, port=8002)
