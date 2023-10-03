@@ -1,5 +1,11 @@
 import sqlite3
 import secrets
+import yaml
+
+# Load config.yml
+with open("config.yml", "r") as config:
+    contents = config.read()
+    configurations = yaml.safe_load(contents)
 
 # Function for verifying user credentials
 def verify_credentials(username, password):
@@ -8,7 +14,7 @@ def verify_credentials(username, password):
     
     else:
         # Connects to database
-        conn = sqlite3.connect("src/database/database.db")
+        conn = sqlite3.connect(configurations['database-path'])
         c = conn.cursor()
 
         # Gets all accounts from database
@@ -38,7 +44,7 @@ def verify_credentials(username, password):
     
 def get_password_salt(username):
     # Connects to the database
-    conn = sqlite3.connect("src/database/database.db")
+    conn = sqlite3.connect(configurations['database-path'])
     c = conn.cursor()
 
     # Gets the salt for the given username from the database
@@ -55,7 +61,7 @@ def get_password_salt(username):
 
 def retrieve_user_token(username):
     # Connects to database
-    conn = sqlite3.connect("src/database/database.db")
+    conn = sqlite3.connect(configurations['database-path'])
     c = conn.cursor()
 
     # Gets all accounts from database
@@ -81,7 +87,7 @@ def retrieve_user_token(username):
 
 def check_username(username):
     # Connects to database
-    conn = sqlite3.connect("src/database/database.db")
+    conn = sqlite3.connect(configurations['database-path'])
     c = conn.cursor()
 
     # Gets all accounts from database
@@ -106,7 +112,7 @@ def check_username(username):
 
 def check_email(email):
     # Connects to database
-    conn = sqlite3.connect("src/database/database.db")
+    conn = sqlite3.connect(configurations['database-path'])
     c = conn.cursor()
 
     # Gets all accounts from database
@@ -128,7 +134,7 @@ def check_email(email):
 
 def create_account(username, email, password, password_salt):
     # Connects to database
-    conn = sqlite3.connect("src/database/database.db")
+    conn = sqlite3.connect(configurations['database-path'])
     c = conn.cursor()
 
     # Generate user token
