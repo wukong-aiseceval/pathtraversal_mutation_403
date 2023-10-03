@@ -8,6 +8,29 @@ from utils import email_checker as email_interface
 
 app = FastAPI()
 
+# Check setup
+print("Checking user images folder...")
+if os.path.isdir("user_images") == False:
+    os.mkdir("user_images")
+    print("Created 'user_images' directory!")
+
+if os.path.isdir("user_images/pfp") == False:
+    os.mkdir("user_images/pfp")
+    print("Created 'user_images/pfp' directory!")
+
+if os.path.isdir("user_images/banner") == False:
+    os.mkdir("user_images/banner")
+    print("Created 'user_images/banner' directory!")
+
+# Check location of assets folder
+if os.path.isdir("assets"):
+    assets_folder = "assets"
+
+else: 
+    assets_folder = "src/assets"
+
+print("Setup check complete!")
+
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
@@ -61,7 +84,7 @@ async def get_pfp(username: str):
         return FileResponse(f"user_images/pfp/{username}", media_type='image/gif')
     else:
         # Returns default image if none is uploaded
-        return FileResponse('user_images/pfp/default.png', media_type='image/gif')
+        return FileResponse(f'{assets_folder}/default.png', media_type='image/gif')
 
 @app.get("/get_banner/{username}")
 async def get_banner(username: str):
