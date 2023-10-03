@@ -20,10 +20,6 @@ app.add_middleware(
 async def home():
     return "Welcome to Lif Auth Server!"
 
-@app.get("/.well-known/acme-challenge/{filename}")
-async def acme_challenge(filename):
-    return FileResponse(f".well-known/acme-challenge/{filename}")
-
 @app.get("/login/{username}/{password}")
 async def login(username: str, password: str):
     # Gets password hash
