@@ -1,4 +1,5 @@
 import sqlite3
+import secrets
 
 # Function for verifying user credentials
 def verify_credentials(username, password):
@@ -72,5 +73,68 @@ def retrieve_user_token(username):
         if username == database_username:
             found_token = database_token
 
+    conn.commit()
+    conn.close()
+
     # Returns the token
     return found_token
+
+def check_username(username):
+    # Connects to database
+    conn = sqlite3.connect("src/database/database.db")
+    c = conn.cursor()
+
+    # Gets all accounts from database
+    c.execute("SELECT * FROM accounts")
+    items = c.fetchall()
+    conn.commit()
+
+    found_username = False
+
+    # Search for username in database
+    for item in items:
+        database_username = item[0]
+
+        if username == database_username:
+            found_username = True
+
+    conn.commit()
+    conn.close()
+
+    # Returns the status
+    return found_username
+
+def check_email(email):
+    # Connects to database
+    conn = sqlite3.connect("src/database/database.db")
+    c = conn.cursor()
+
+    # Gets all accounts from database
+    c.execute("SELECT * FROM accounts")
+    items = c.fetchall()
+    conn.commit()
+
+    found_email = False
+
+    # Search for username in database
+    for item in items:
+        database_email = item[2]
+
+        if email == database_email:
+            found_email = True
+
+    # Returns the status
+    return found_email
+
+def create_account(username, email, password, password_salt):
+    # Connects to database
+    conn = sqlite3.connect("src/database/database.db")
+    c = conn.cursor()
+
+    # Generate user token
+    token = str(secrets.token_hex(16 // 2))
+
+    c.execute("INSERT INTO accounts (username, password, email, token, salt) VALUES (?, ?, ?, ?, ?)", (username, password, email, token, password_salt))
+
+    conn.commit()
+    conn.close()
