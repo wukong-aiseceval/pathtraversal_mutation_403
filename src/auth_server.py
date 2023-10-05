@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import os
+import yaml
+import json
 from utils import db_interface as database
 from utils import password_hasher as hasher
 from utils import email_checker as email_interface
@@ -29,7 +31,51 @@ if os.path.isdir("assets"):
 else: 
     assets_folder = "src/assets"
 
+# Check location of resources folder
+if os.path.isdir("resources"):
+    resources_folder = "resources"
+
+else: 
+    resources_folder = "src/resources"
+
+# Check the config.yml to ensure its up-to-date
+print("Checking config...")
+
+if not os.path.isfile("config.yml"):
+    with open("config.yml", 'x') as config:
+        config.close()
+
+with open("config.yml", "r") as config:
+    contents = config.read()
+    configurations = yaml.safe_load(contents)
+    config.close()
+
+# Ensure the configurations are not None
+if configurations == None:
+    configurations = {}
+
+# Open reference json file for config
+with open(f"{resources_folder}/json data/default_config.json", "r") as json_file:
+    json_data = json_file.read()
+    default_config = json.loads(json_data)
+
+
+# Compare config with json data
+for option in default_config:
+    print(option)
+    if not option in configurations:
+        configurations[option] = default_config[option]
+        print(f"Added '{option}' to config!")
+
+# Open config in write mode to write the updated config
+with open("config.yml", "w") as config:
+    new_config = yaml.safe_dump(configurations)
+    config.write(new_config)
+    config.close()
+
 print("Setup check complete!")
+
+database.load_config()
 
 # Enable CORS
 app.add_middleware(
