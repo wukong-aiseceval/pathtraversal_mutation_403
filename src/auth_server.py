@@ -41,6 +41,10 @@ else:
 # Check the config.yml to ensure its up-to-date
 print("Checking config...")
 
+if not os.path.isfile("config.yml"):
+    with open("config.yml", 'x') as config:
+        config.close()
+
 with open("config.yml", "r") as config:
     contents = config.read()
     configurations = yaml.safe_load(contents)
@@ -70,6 +74,8 @@ with open("config.yml", "w") as config:
     config.close()
 
 print("Setup check complete!")
+
+database.load_config()
 
 # Enable CORS
 app.add_middleware(

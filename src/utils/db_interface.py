@@ -3,9 +3,13 @@ import secrets
 import yaml
 
 # Load config.yml
-with open("config.yml", "r") as config:
-    contents = config.read()
-    configurations = yaml.safe_load(contents)
+# Run by main file after the config checks have been completed
+def load_config():
+    global configurations
+
+    with open("config.yml", "r") as config:
+        contents = config.read()
+        configurations = yaml.safe_load(contents)
 
 # Function for verifying user credentials
 def verify_credentials(username, password):
