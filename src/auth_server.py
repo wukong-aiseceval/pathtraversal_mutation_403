@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Form
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import os
@@ -96,11 +96,13 @@ async def get_banner(username: str):
         return FileResponse(f'{assets_folder}/default_banner.png', media_type='image/gif')
     
 @app.post("/create_lif_account")
-async def create_lif_account(
-    username: str = Form(),
-    password: str = Form(),
-    email: str = Form()
-):
+async def create_lif_account(request: Request):
+    # Get POST data
+    data = await request.json()
+    username = data["username"]
+    password = data["password"]
+    email = data["email"]
+
     # Check username usage
     username_status = database.check_username(username)
     if username_status:
