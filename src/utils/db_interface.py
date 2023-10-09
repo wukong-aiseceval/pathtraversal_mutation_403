@@ -1,9 +1,12 @@
-import sqlite3
 import secrets
 import yaml
+import mysql.connector
+
+# Global database connection
+conn = None
 
 # Load config.yml
-# Run by main file after the config checks have been completed
+# Run by the main file after the config checks have been completed
 def load_config():
     global configurations
 
@@ -11,20 +14,29 @@ def load_config():
         contents = config.read()
         configurations = yaml.safe_load(contents)
 
+# Function to establish a database connection
+def connect_to_database():
+    global conn
+    if conn is None:
+        conn = mysql.connector.connect(
+            host=configurations['mysql-host'],
+            user=configurations['mysql-user'],
+            password=configurations['mysql-password'],
+            database=configurations['mysql-database']
+        )
+
 # Function for verifying user credentials
 def verify_credentials(username, password):
-    if password == False:
+    if password is None:
         return "Bad!"
     
     else:
-        # Connects to database
-        conn = sqlite3.connect(configurations['database-path'])
-        c = conn.cursor()
+        connect_to_database()
+        cursor = conn.cursor()
 
-        # Gets all accounts from database
-        c.execute("SELECT * FROM accounts")
-        items = c.fetchall()
-        conn.commit()
+        # Gets all accounts from the MySQL database
+        cursor.execute("SELECT * FROM accounts")
+        items = cursor.fetchall()
 
         foundAccount = False
 
@@ -33,30 +45,27 @@ def verify_credentials(username, password):
             databaseUser = account[0]
             databasePass = account[1]
 
-            # Checks if the credentials match 
+            # Checks if the credentials match
             if username == databaseUser and password == databasePass:
                 foundAccount = True
 
+        cursor.close()
+
         # Checks if the account was found
-        if foundAccount == True:
-            conn.close()
+        if foundAccount:
             return "Good!"
-        
-        else: 
-            conn.close()
+        else:
             return "Bad!"
-    
+
 def get_password_salt(username):
-    # Connects to the database
-    conn = sqlite3.connect(configurations['database-path'])
-    c = conn.cursor()
+    connect_to_database()
+    cursor = conn.cursor()
 
-    # Gets the salt for the given username from the database
-    c.execute("SELECT salt FROM accounts WHERE username = ?", (username,))
-    result = c.fetchone()
+    # Gets the salt for the given username from the MySQL database
+    cursor.execute("SELECT salt FROM accounts WHERE username = %s", (username,))
+    result = cursor.fetchone()
 
-    conn.commit()
-    conn.close()
+    cursor.close()
 
     if result is not None:
         return result[0]  # Return the salt value if found
@@ -64,18 +73,16 @@ def get_password_salt(username):
         return False  # Return False if no matching username is found
 
 def retrieve_user_token(username):
-    # Connects to database
-    conn = sqlite3.connect(configurations['database-path'])
-    c = conn.cursor()
+    connect_to_database()
+    cursor = conn.cursor()
 
-    # Gets all accounts from database
-    c.execute("SELECT * FROM accounts")
-    items = c.fetchall()
-    conn.commit()
+    # Gets all accounts from the MySQL database
+    cursor.execute("SELECT * FROM accounts")
+    items = cursor.fetchall()
 
     found_token = False
 
-    # Gets the token from the database
+    # Gets the token from the MySQL database
     for item in items:
         database_username = item[0]
         database_token = item[3]
@@ -83,68 +90,64 @@ def retrieve_user_token(username):
         if username == database_username:
             found_token = database_token
 
-    conn.commit()
-    conn.close()
+    cursor.close()
 
     # Returns the token
     return found_token
 
 def check_username(username):
-    # Connects to database
-    conn = sqlite3.connect(configurations['database-path'])
-    c = conn.cursor()
+    connect_to_database()
+    cursor = conn.cursor()
 
-    # Gets all accounts from database
-    c.execute("SELECT * FROM accounts")
-    items = c.fetchall()
-    conn.commit()
+    # Gets all accounts from the MySQL database
+    cursor.execute("SELECT * FROM accounts")
+    items = cursor.fetchall()
 
     found_username = False
 
-    # Search for username in database
+    # Search for username in the MySQL database
     for item in items:
         database_username = item[0]
 
         if username == database_username:
             found_username = True
 
-    conn.commit()
-    conn.close()
+    cursor.close()
 
     # Returns the status
     return found_username
 
 def check_email(email):
-    # Connects to database
-    conn = sqlite3.connect(configurations['database-path'])
-    c = conn.cursor()
+    connect_to_database()
+    cursor = conn.cursor()
 
-    # Gets all accounts from database
-    c.execute("SELECT * FROM accounts")
-    items = c.fetchall()
-    conn.commit()
+    # Gets all accounts from the MySQL database
+    cursor.execute("SELECT * FROM accounts")
+    items = cursor.fetchall()
 
     found_email = False
 
-    # Search for username in database
+    # Search for email in the MySQL database
     for item in items:
         database_email = item[2]
 
         if email == database_email:
             found_email = True
 
+    cursor.close()
+
     # Returns the status
     return found_email
 
 def create_account(username, email, password, password_salt):
-    # Connects to database
-    conn = sqlite3.connect(configurations['database-path'])
-    c = conn.cursor()
+    connect_to_database()
+    cursor = conn.cursor()
 
     # Generate user token
     token = str(secrets.token_hex(16 // 2))
 
-    c.execute("INSERT INTO accounts (username, password, email, token, salt) VALUES (?, ?, ?, ?, ?)", (username, password, email, token, password_salt))
+    cursor.execute("INSERT INTO accounts (username, password, email, token, salt) VALUES (%s, %s, %s, %s, %s)",
+                   (username, password, email, token, password_salt))
 
     conn.commit()
-    conn.close()
+    cursor.close()
