@@ -42,8 +42,8 @@ def verify_credentials(username, password):
 
         # Looks for the account in the database
         for account in items:
-            databaseUser = account[0]
-            databasePass = account[1]
+            databaseUser = account[1]
+            databasePass = account[2]
 
             # Checks if the credentials match
             if username == databaseUser and password == databasePass:
