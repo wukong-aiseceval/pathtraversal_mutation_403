@@ -84,8 +84,8 @@ def retrieve_user_token(username):
 
     # Gets the token from the MySQL database
     for item in items:
-        database_username = item[0]
-        database_token = item[3]
+        database_username = item[1]
+        database_token = item[4]
 
         if username == database_username:
             found_token = database_token
