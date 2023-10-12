@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import os
@@ -140,6 +140,63 @@ async def get_banner(username: str):
     else:
         # Returns default image if none is uploaded
         return FileResponse('user_images/banner/default.png', media_type='image/gif')
+    
+@app.post("/create_lif_account")
+async def create_lif_account(request: Request):
+    # Get POST data
+    data = await request.json()
+    username = data["username"]
+    password = data["password"]
+    email = data["email"]
+
+    # Check username usage
+    username_status = database.check_username(username)
+    if username_status:
+        raise HTTPException(status_code=409, detail="Username Already in Use!")
+
+    # Check email usage
+    email_status = database.check_email(email)
+    if email_status:
+        raise HTTPException(status_code=409, detail="Email Already in Use!")
+
+    # Check if email is valid
+    email_isValid = email_interface.is_valid_email(email)
+    if not email_isValid:
+        raise HTTPException(status_code=400, detail="Invalid Email!")
+
+    # Hash user password
+    password_hash = hasher.get_hash_gen_salt(password)
+
+    # Create user account
+    database.create_account(username=username, password=password_hash['password'], email=email, password_salt=password_hash['salt'])
+
+    return {"Status": "Ok"}  
+
+@app.get("/check_account_info_usage/{type}/{info}")
+async def check_account_info_usage(type: str, info: str):
+    if type == "username":
+        # Check username usage
+        username_status = database.check_username(info)
+        if username_status:
+            raise HTTPException(status_code=409, detail="Username Already in Use!")
+        else:
+            return {"Status": "Ok"}
+
+    if type == "email":
+        # Check email usage
+        email_status = database.check_email(info)
+        if email_status:
+            raise HTTPException(status_code=409, detail="Email Already in Use!")
+        else:
+            return {"Status": "Ok"}
+
+    if type == "emailValid":
+        # Check if email is valid
+        email_isValid = email_interface.is_valid_email(info)
+        if not email_isValid:
+            raise HTTPException(status_code=400, detail="Invalid Email!")
+        else:
+            return {"Status": "Ok"}
 
 @app.get("/create_account/{username}/{email}/{password}")
 async def create_account(username: str, email: str, password: str):
