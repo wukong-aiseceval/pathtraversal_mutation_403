@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Form, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import os
 import yaml
 import json
@@ -197,7 +197,64 @@ async def check_account_info_usage(type: str, info: str):
             raise HTTPException(status_code=400, detail="Invalid Email!")
         else:
             return {"Status": "Ok"}
+        
+@app.post("/update_pfp")
+async def update_pfp(file: UploadFile = File(), username: str = Form(), token: str = Form()):
+    # Verify user token
+    status = database.check_token(username=username, token=token)
 
+    if status == True:
+        # Read the contents of the profile image
+        contents = await file.read()
+
+        # Save user avatar
+        with open(f"user_images/pfp/{username}.png", "wb") as write_file:
+            write_file.write(contents)
+            write_file.close()
+
+        return {'Status': 'Ok'}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid Token!")
+    
+@app.post("/update_profile_banner")
+async def update_pfp(file: UploadFile = File(), username: str = Form(), token: str = Form()):
+    # Verify user token
+    status = database.check_token(username=username, token=token)
+
+    if status == True:
+        # Read the contents of the profile image
+        contents = await file.read()
+
+        # Save user avatar
+        with open(f"user_images/banner/{username}.png", "wb") as write_file:
+            write_file.write(contents)
+            write_file.close()
+
+        return {'Status': 'Ok'}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid Token!")
+    
+@app.post('/update_account_info/personalization')
+async def update_account_info(username: str = Form(), token: str = Form(), bio: str = Form(), pronouns: str = Form()):
+    # Verify user token
+    if database.check_token(username=username, token=token):
+        database.update_user_bio(username=username, data=bio)
+        database.update_user_pronouns(username=username, data=pronouns)
+
+        return JSONResponse(status_code=200, content="Updated Successfully")
+    else:
+        raise HTTPException(status_code=401, detail="Invalid Token!")
+    
+@app.get("/get_user_bio/{username}")
+async def get_user_bio(username: str):
+    return database.get_bio(username=username)
+
+@app.get("/get_user_pronouns/{username}")
+async def get_user_pronouns(username: str):
+    return database.get_pronouns(username=username)
+
+# Legacy create account route
+# New software should not use this. Use "/create_lif_account" instead
 @app.get("/create_account/{username}/{email}/{password}")
 async def create_account(username: str, email: str, password: str):
     # Check username usage

@@ -151,3 +151,60 @@ def create_account(username, email, password, password_salt):
 
     conn.commit()
     cursor.close()
+
+def check_token(username: str, token: str):
+    connect_to_database()
+    cursor = conn.cursor()
+
+    # Gets all accounts from the MySQL database
+    cursor.execute("SELECT * FROM accounts")
+    items = cursor.fetchall()
+
+    found_token = False
+
+    for user in items:
+        database_user = user[1]
+        database_token = user[4]
+
+        if database_user == username and database_token == token:
+            found_token = True
+
+    return found_token
+
+def update_user_bio(username, data):
+    connect_to_database()
+    cursor = conn.cursor()
+
+    # Grab user info from database
+    cursor.execute("UPDATE accounts SET bio = %s WHERE username = %s", (data, username))
+    conn.commit()
+
+    return "Ok"
+
+def update_user_pronouns(username, data):
+    connect_to_database()
+    cursor = conn.cursor()
+
+    # Grab user info from database
+    cursor.execute("UPDATE accounts SET pronouns = %s WHERE username = %s", (data, username))
+    conn.commit()
+
+    return "Ok"
+
+def get_bio(username):
+    connect_to_database()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM accounts WHERE username = %s", (username,))
+    data = cursor.fetchone()
+
+    return data[6]
+
+def get_pronouns(username):
+    connect_to_database()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM accounts WHERE username = %s", (username,))
+    data = cursor.fetchone()
+
+    return data[7]
