@@ -141,6 +141,26 @@ async def get_banner(username: str):
         # Returns default image if none is uploaded
         return FileResponse('user_images/banner/default.png', media_type='image/gif')
     
+@app.post('/lif_password_update')
+async def lif_password_update(username: str = Form(), current_password: str = Form(), new_password: str = Form()):
+    # Gets password hash
+    password_hash = hasher.get_hash_with_database_salt(username=username, password=current_password)
+
+    # Verify old credentials before updating password
+    if database.verify_credentials(username=username, password=password_hash) == 'Good!':
+        # Get hashed password and salt
+        new_password_data = hasher.get_hash_gen_salt(new_password)
+
+        # Update user salt in database
+        database.update_user_salt(username=username, salt=new_password_data['salt'])
+
+        # Update user password in database
+        database.update_password(username=username, password=new_password_data['password'])
+
+        return JSONResponse(status_code=200, content='Updated Password')
+    else: 
+        raise HTTPException(status_code=401, detail="Invalid Password!")
+    
 @app.post("/create_lif_account")
 async def create_lif_account(request: Request):
     # Get POST data

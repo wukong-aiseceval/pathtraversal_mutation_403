@@ -185,7 +185,7 @@ def update_user_pronouns(username, data):
     connect_to_database()
     cursor = conn.cursor()
 
-    # Grab user info from database
+    # Update pronouns in database
     cursor.execute("UPDATE accounts SET pronouns = %s WHERE username = %s", (data, username))
     conn.commit()
 
@@ -208,3 +208,19 @@ def get_pronouns(username):
     data = cursor.fetchone()
 
     return data[7]
+
+def update_user_salt(username: str, salt: str):
+    connect_to_database()
+    cursor = conn.cursor()
+
+    # Update salt in database
+    cursor.execute("UPDATE accounts SET salt = %s WHERE username = %s", (salt, username))
+    conn.commit()
+
+def update_password(username: str, password: str):
+    connect_to_database()
+    cursor = conn.cursor()
+
+    # Update password in database
+    cursor.execute("UPDATE accounts SET password = %s WHERE username = %s", (password, username))
+    conn.commit()
