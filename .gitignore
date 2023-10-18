@@ -3,3 +3,6 @@ __pycache__/
 
 # Ignore user_images dir
 user_images/
+
+# Ignore config files
+config.yml

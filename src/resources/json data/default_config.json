@@ -1,0 +1,6 @@
+{
+    "mysql-host": "localhost",
+    "mysql-user": "root",
+    "mysql-password": "test123",
+    "mysql-database": "Lif_Accounts"
+}
