@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Form, File, UploadFile
+from fastapi import FastAPI, HTTPException, Request, Form, File, UploadFile, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 import os
@@ -7,6 +7,7 @@ import json
 from utils import db_interface as database
 from utils import password_hasher as hasher
 from utils import email_checker as email_interface
+from utils import access_control as access_control
 
 app = FastAPI()
 
@@ -63,11 +64,6 @@ if not os.path.isfile('access-control.yml'):
     with open("access-control.yml", 'x') as config:
         config.close()
 
-# Load access control config
-with open('access-control.yml', 'r') as config:
-    contents = config.read()
-    access_control_config = yaml.safe_load(contents)
-
 # Compare config with json data
 for option in default_config:
     if not option in configurations:
@@ -117,6 +113,25 @@ async def login(username: str, password: str):
     else:
         # Tells client credentials are incorrect
         return {"Status": "Unsuccessful", "Token": "None"}
+    
+@app.get('/get_account_info/{data}/{account}')
+async def get_account_data(data, account, request: Request):
+    # Get access token from request header
+    access_token = request.headers.get('access-token')
+
+    # Verify access token is valid
+    if access_control.verify_token(access_token):
+        # Check what data the server is requesting
+        if data == "email":
+            # Verify server has permission to access the requested information
+            if access_control.has_perms(token=access_token, permission='account.email'): 
+                return {"email": database.get_user_email(username=account)}
+            else:
+                raise HTTPException(status_code=403, detail="No Permission!")
+        else:
+            raise HTTPException(status_code=400, detail="Unknown Data Type!")
+    else:
+        raise HTTPException(status_code=403, detail="Invalid Token!")
 
 @app.get("/verify_token/{username}/{token}")
 async def verify_token(username: str, token: str):
