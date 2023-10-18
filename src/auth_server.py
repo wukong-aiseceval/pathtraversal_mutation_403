@@ -59,10 +59,17 @@ with open(f"{resources_folder}/json data/default_config.json", "r") as json_file
     json_data = json_file.read()
     default_config = json.loads(json_data)
 
+if not os.path.isfile('access-control.yml'):
+    with open("access-control.yml", 'x') as config:
+        config.close()
+
+# Load access control config
+with open('access-control.yml', 'r') as config:
+    contents = config.read()
+    access_control_config = yaml.safe_load(contents)
 
 # Compare config with json data
 for option in default_config:
-    print(option)
     if not option in configurations:
         configurations[option] = default_config[option]
         print(f"Added '{option}' to config!")
