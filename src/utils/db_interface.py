@@ -224,3 +224,12 @@ def update_password(username: str, password: str):
     # Update password in database
     cursor.execute("UPDATE accounts SET password = %s WHERE username = %s", (password, username))
     conn.commit()
+
+def get_user_email(username: str):
+    connect_to_database()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM accounts WHERE username = %s", (username,))
+    data = cursor.fetchone()
+
+    return data[3]
