@@ -25,7 +25,13 @@ When a user wants to log into a Lif service they must go through the Lif Auth Se
 When a user executes an action that requires authentication, there are a few steps that are taken.
 1. The service makes a request to the Lif Auth Server with the username and token
 2. The Lif Auth Server verifies the token with the database. The token must correspond to the account it's for otherwise the verification fails.
-3. The Lif Auth Server replies to the service with the status of the verification. 
+3. The Lif Auth Server replies to the service with the status of the verification.
+
+### User Data Retrival 
+User data retrieval is usually done by a server. This is for sensitive info in Lif Accounts that the service needs access to. The service will access the data using an access control token. Lif can manage the permissions of these tokens to determine what data they have access to. Here's how it works.
+1. The service makes a request to the Lif Auth Server with its access token.
+2. Lif Auth Server will look at its local configuration to determine if the access token is valid and if they have permission to access the data it is requesting.
+3. Lif Auth Server will reply with the status of the operation and the data the server requested. 
 
 # 👋 HELP WANTED
 Lif Platforms is looking for contributors for Ringer and other services from Lif. If you are interested please reach out at: Lif.Platforms@gmail.com
