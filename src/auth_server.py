@@ -113,6 +113,25 @@ async def login(username: str, password: str):
     else:
         # Tells client credentials are incorrect
         return {"Status": "Unsuccessful", "Token": "None"}
+
+@app.post('/lif_login')
+async def lif_login(username: str = Form(), password: str = Form()):
+    # Gets password hash
+    password_hash = hasher.get_hash_with_database_salt(username=username, password=password)
+
+    # Checks if password hash was successful
+    if not password_hash:
+        return HTTPException(status_code=401, detail='Invalid Login Credentials!')
+
+    # Verifies credentials with database
+    if database.verify_credentials(username=username, password=password_hash) == 'Good!':
+        # Gets token from database
+        token = database.retrieve_user_token(username=username)
+
+        return {'token': token}
+    else: 
+        # Tells client credentials are incorrect
+        raise HTTPException(status code=401, detail='Incorrect Login Credentials')
     
 @app.post("/update_pfp")
 async def update_pfp(file: UploadFile = File(), username: str = Form(), token: str = Form()):
