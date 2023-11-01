@@ -28,7 +28,7 @@ When a user executes an action that requires authentication, there are a few ste
 3. The Lif Auth Server replies to the service with the status of the verification.
 
 ### User Data Retrival 
-User data retrieval is usually done by a server. This is for sensitive info in Lif Accounts that the service needs access to. The service will access the data using an access control token. Lif can manage the permissions of these tokens to determine what data they have access to. Here's how it works.
+User data retrieval is usually done by a service. This is for sensitive info in Lif Accounts that the service needs access to. The service will access the data using an access control token. Lif can manage the permissions of these tokens to determine what data they have access to. Here's how it works.
 1. The service makes a request to the Lif Auth Server with its access token.
 2. Lif Auth Server will look at its local configuration to determine if the access token is valid and if they have permission to access the data it is requesting.
 3. Lif Auth Server will reply with the status of the operation and the data the server requested. 
