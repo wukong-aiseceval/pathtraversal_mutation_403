@@ -131,7 +131,7 @@ async def lif_login(username: str = Form(), password: str = Form()):
         return {'token': token}
     else: 
         # Tells client credentials are incorrect
-        raise HTTPException(status code=401, detail='Incorrect Login Credentials')
+        raise HTTPException(status_code=401, detail='Incorrect Login Credentials')
     
 @app.post("/update_pfp")
 async def update_pfp(file: UploadFile = File(), username: str = Form(), token: str = Form()):
