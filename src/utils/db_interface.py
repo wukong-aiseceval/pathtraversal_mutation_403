@@ -1,5 +1,6 @@
 import secrets
 import yaml
+import uuid
 import mysql.connector
 
 # Global database connection
@@ -141,13 +142,18 @@ def check_email(email):
 
 def create_account(username, email, password, password_salt):
     connect_to_database()
+
+    # Define database cursor
     cursor = conn.cursor()
 
     # Generate user token
     token = str(secrets.token_hex(16 // 2))
 
-    cursor.execute("INSERT INTO accounts (username, password, email, token, salt) VALUES (%s, %s, %s, %s, %s)",
-                   (username, password, email, token, password_salt))
+    # Generate user id
+    user_id = str(uuid.uuid4()) 
+
+    cursor.execute("INSERT INTO accounts (username, password, email, token, salt, bio, pronouns, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                   (username, password, email, token, password_salt, None, None, user_id))
 
     conn.commit()
     cursor.close()
