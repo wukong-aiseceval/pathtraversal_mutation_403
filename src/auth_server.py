@@ -94,6 +94,17 @@ async def home():
 
 @app.get("/login/{username}/{password}")
 async def login(username: str, password: str):
+    """
+    ## Login Route For Lif Accounts (DEPRECIATED)
+    Handles the authentication process for Lif Accounts.
+    
+    ### Parameters:
+    - **username (str):** The username of the account.
+    - **password (str):** The password for the account.
+
+    ### Returns:
+    - **dict:** Status of login and user token.
+    """
     # Gets password hash
     password_hash = hasher.get_hash_with_database_salt(username=username, password=password)
 
@@ -116,6 +127,17 @@ async def login(username: str, password: str):
 
 @app.post('/lif_login')
 async def lif_login(username: str = Form(), password: str = Form()):
+    """
+    ## Login Route For Lif Accounts (NEW)
+    Handles the authentication process for Lif Accounts.
+
+    ### Parameters:
+    - **username (str):** The username of the account.
+    - **password (str):** The password for the account.
+
+    ### Returns:
+    - **dict:** Token for user account.
+    """
     # Gets password hash
     password_hash = hasher.get_hash_with_database_salt(username=username, password=password)
 
@@ -135,6 +157,18 @@ async def lif_login(username: str = Form(), password: str = Form()):
     
 @app.post("/update_pfp")
 async def update_pfp(file: UploadFile = File(), username: str = Form(), token: str = Form()):
+    """
+    ## Update User Avatar (Profile Picture)
+    Allows users to update their avatar (profile picture).
+    
+    ### Parameters:
+    - **file (file):** The image to be set as the avatar.
+    - **username (str):** The username for the account.
+    - **token (str):** The token for the account.
+
+    ### Returns:
+    - **dict:** Status of the operation.
+    """
     # Verify user token
     status = database.check_token(username=username, token=token)
 
@@ -152,7 +186,19 @@ async def update_pfp(file: UploadFile = File(), username: str = Form(), token: s
         raise HTTPException(status_code=401, detail="Invalid Token!")
 
 @app.post("/update_profile_banner")
-async def update_pfp(file: UploadFile = File(), username: str = Form(), token: str = Form()):
+async def update_banner(file: UploadFile = File(), username: str = Form(), token: str = Form()):
+    """
+    ## Update User Banner
+    Allows users to update their account banner.
+    
+    ### Parameters:
+    - **file (file):** The image to be set as the banner.
+    - **username (str):** The username for the account.
+    - **token (str):** The token for the account.
+
+    ### Returns:
+    - **dict:** Status of the operation.
+    """
     # Verify user token
     status = database.check_token(username=username, token=token)
 
@@ -171,6 +217,19 @@ async def update_pfp(file: UploadFile = File(), username: str = Form(), token: s
 
 @app.post('/update_account_info/personalization')
 async def update_account_info(username: str = Form(), token: str = Form(), bio: str = Form(), pronouns: str = Form()):
+    """
+    ## Update User Account Info
+    Allows users to update their account information (bio, pronouns, etc...)
+    
+    ### Parameters:
+    - **username (str):** The username for the account.
+    - **token (str):** The token for the account.
+    - **bio (str):** The bio for the account.
+    - **pronouns (str):** The pronouns for the account.
+
+    ### Returns:
+    - **JSON:** Status of the operation.
+    """
     # Verify user token
     if database.check_token(username=username, token=token):
         database.update_user_bio(username=username, data=bio)
@@ -182,6 +241,16 @@ async def update_account_info(username: str = Form(), token: str = Form(), bio: 
 
 @app.get("/get_user_bio/{username}")
 async def get_user_bio(username: str):
+    """
+    ## Get User Account Bio
+    Allows services to get the bio information for a given account
+    
+    ### Parameters:
+    - **username (str):** The username for the account.
+
+    ### Returns:
+    - **str:** Bio for the account.
+    """
     return database.get_bio(username=username)
 
 @app.get("/get_user_pronouns/{username}")
@@ -190,6 +259,20 @@ async def get_user_pronouns(username: str):
     
 @app.get('/get_account_info/{data}/{account}')
 async def get_account_data(data, account, request: Request):
+    """
+    ## Get Account Info
+    Allows services to access sensitive information on Lif Accounts.
+
+    ### Headers
+    - **access-token (str):** Services access token. 
+    
+    ### Parameters:
+    - **data (str):** Type of data being requested.
+    - **account (str):** Account associated with the data.
+
+    ### Returns:
+    - **dict:** Data the service requested.
+    """
     # Get access token from request header
     access_token = request.headers.get('access-token')
 
@@ -209,6 +292,17 @@ async def get_account_data(data, account, request: Request):
 
 @app.get("/verify_token/{username}/{token}")
 async def verify_token(username: str, token: str):
+    """
+    ## Verify User Token
+    Allows services to verify the authenticity of a token.
+    
+    ### Parameters:
+    - **username (str):** The username for the account.
+    - **token (str):** The token for the account.
+
+    ### Returns:
+    - **dict:** Status of the operation.
+    """
     # Gets token from database
     database_token = database.retrieve_user_token(username=username)
 
@@ -221,6 +315,16 @@ async def verify_token(username: str, token: str):
 
 @app.get("/get_pfp/{username}")
 async def get_pfp(username: str):
+    """
+    ## Get User Avatar (Profile Picture)
+    Allows services to get the avatar (profile picture) of a specified account. 
+    
+    ### Parameters:
+    - **username (str):** The username for the account.
+
+    ### Returns:
+    - **file:** The avatar the service requested.
+    """
     # Checks if the user has a profile pic uploaded
     if os.path.isfile(f"user_images/pfp/{username}"):
         return FileResponse(f"user_images/pfp/{username}", media_type='image/gif')
@@ -230,6 +334,16 @@ async def get_pfp(username: str):
 
 @app.get("/get_banner/{username}")
 async def get_banner(username: str):
+    """
+    ## Get User Banner
+    Allows services to get the account banner of a specified account.
+    
+    ### Parameters:
+    - **username (str):** The username for the account.
+
+    ### Returns:
+    - **file:** The banner the service requested.
+    """
     # Checks if the user has a profile pic uploaded
     if os.path.isfile(f"user_images/banner/{username}"):
         return FileResponse(f"user_images/banner/{username}", media_type='image/gif')
@@ -239,6 +353,18 @@ async def get_banner(username: str):
     
 @app.post("/create_lif_account")
 async def create_lif_account(request: Request):
+    """
+    ## Create Lif Account (NEW)
+    Handles the creation of Lif Accounts
+    
+    ### Parameters:
+    - **username (str):** The username for the account.
+    - **password (str):** The password for the account.
+    - **email (str):** The email for the account.
+
+    ### Returns:
+    - **dict:** Status of the operation.
+    """
     # Get POST data
     data = await request.json()
     username = data["username"]
@@ -270,6 +396,17 @@ async def create_lif_account(request: Request):
 
 @app.get("/check_account_info_usage/{type}/{info}")
 async def check_account_info_usage(type: str, info: str):
+    """
+    ## Check Account Info Usage
+    Allows services to check the usage of certain account info (username, email, etc.) before requesting the account creation
+    
+    ### Parameters:
+    - **type (str):** Type of info being checked.
+    - **info (str):** The info being checked.
+
+    ### Returns:
+    - **dict:** Status of the operation.
+    """
     if type == "username":
         # Check username usage
         username_status = database.check_username(info)
@@ -296,6 +433,18 @@ async def check_account_info_usage(type: str, info: str):
 
 @app.get("/create_account/{username}/{email}/{password}")
 async def create_account(username: str, email: str, password: str):
+    """
+    ## Create Lif Account (DEPRECIATED)
+    Handles the creation of Lif Accounts. 
+    
+    ### Parameters:
+    - **username (str):** The username for the account.
+    - **password (str):** The password for the account.
+    - **email (str):** The email for the account.
+
+    ### Returns:
+    - **dict:** Status of the operation.
+    """
     # Check username usage
     username_status = database.check_username(username)
     if username_status:
@@ -321,6 +470,18 @@ async def create_account(username: str, email: str, password: str):
 
 @app.post('/lif_password_update')
 async def lif_password_update(username: str = Form(), current_password: str = Form(), new_password: str = Form()):
+    """
+    ## Update Account Password
+    Handles the changing of a users account password. 
+    
+    ### Parameters:
+    - **username (str):** The username for the account.
+    - **current_password (str):** The current password for the account.
+    - **new_password (str):** The new password for the account.
+
+    ### Returns:
+    - **JSON:** Status of the operation.
+    """
     # Gets password hash
     password_hash = hasher.get_hash_with_database_salt(username=username, password=current_password)
 
