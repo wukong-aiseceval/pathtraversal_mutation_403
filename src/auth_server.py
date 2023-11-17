@@ -9,8 +9,6 @@ from utils import password_hasher as hasher
 from utils import email_checker as email_interface
 from utils import access_control as access_control
 
-app = FastAPI()
-
 # Check setup
 print("Checking user images folder...")
 if os.path.isdir("user_images") == False:
@@ -76,9 +74,14 @@ with open("config.yml", "w") as config:
     config.write(new_config)
     config.close()
 
+# Get run environment 
+__env__= os.getenv('RUN_ENVIRONMENT')
+
 print("Setup check complete!")
 
 database.load_config()
+
+app = FastAPI()
 
 # Enable CORS
 app.add_middleware(
