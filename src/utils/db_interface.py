@@ -17,14 +17,23 @@ def load_config():
 
 # Function to establish a database connection
 def connect_to_database():
-    global conn
-    if conn is None:
+    # Handle connecting to the database
+    def connect():
+        global conn
         conn = mysql.connector.connect(
             host=configurations['mysql-host'],
             user=configurations['mysql-user'],
             password=configurations['mysql-password'],
             database=configurations['mysql-database']
         )
+    
+    # Check if there is a MySQL connection
+    if conn is None:
+        connect()
+    else:
+        # Check if existing connection is still alive
+        if not conn.is_connected():
+            connect()
 
 # Function for verifying user credentials
 def verify_credentials(username, password):
