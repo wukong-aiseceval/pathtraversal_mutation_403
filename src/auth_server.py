@@ -502,6 +502,10 @@ async def lif_password_update(username: str = Form(), current_password: str = Fo
         return JSONResponse(status_code=200, content='Updated Password')
     else: 
         raise HTTPException(status_code=401, detail="Invalid Password!")
+    
+@app.get('/get_username/{account_id}')
+async def get_username(account_id: str):
+    return database.get_username(account_id=account_id)
 
 if __name__ == '__main__':
     import uvicorn

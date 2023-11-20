@@ -248,3 +248,12 @@ def get_user_email(username: str):
     data = cursor.fetchone()
 
     return data[3]
+
+def get_username(account_id: str):
+    connect_to_database()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM accounts WHERE user_id = %s", (account_id,))
+    data = cursor.fetchone()
+
+    return data[1]
