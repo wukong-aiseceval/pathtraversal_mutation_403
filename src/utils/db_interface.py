@@ -110,17 +110,14 @@ def check_username(username):
     cursor = conn.cursor()
 
     # Gets all accounts from the MySQL database
-    cursor.execute("SELECT * FROM accounts")
-    items = cursor.fetchall()
+    cursor.execute("SELECT * FROM accounts WHERE username = %s", (username,))
+    item = cursor.fetchone()
 
     found_username = False
 
-    # Search for username in the MySQL database
-    for item in items:
-        database_username = item[0]
-
-        if username == database_username:
-            found_username = True
+    # Set 'found_username' to 'True' if username was found
+    if item:
+        found_username = True
 
     cursor.close()
 
@@ -131,18 +128,15 @@ def check_email(email):
     connect_to_database()
     cursor = conn.cursor()
 
-    # Gets all accounts from the MySQL database
-    cursor.execute("SELECT * FROM accounts")
-    items = cursor.fetchall()
-
     found_email = False
 
-    # Search for email in the MySQL database
-    for item in items:
-        database_email = item[2]
+    # Get email from MySQL database
+    cursor.execute("SELECT * FROM accounts WHERE email = %s", (email,))
+    item = cursor.fetchone()
 
-        if email == database_email:
-            found_email = True
+    # Set 'found_email' to 'True' if email was found
+    if item:
+        found_email = True
 
     cursor.close()
 
