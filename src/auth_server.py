@@ -81,7 +81,15 @@ print("Setup check complete!")
 
 database.load_config()
 
-app = FastAPI()
+print(__env__)
+
+# Enable/disable developer docs based on env
+if __env__ == 'PRODUCTION':
+    enable_dev_docs = None
+else:
+    enable_dev_docs = '/docs'
+
+app = FastAPI(docs_url=enable_dev_docs, redoc_url=None)
 
 # Enable CORS
 app.add_middleware(
