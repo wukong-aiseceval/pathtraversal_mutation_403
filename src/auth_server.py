@@ -90,7 +90,13 @@ if __env__ == 'PRODUCTION':
 else:
     enable_dev_docs = '/docs'
 
-app = FastAPI(docs_url=enable_dev_docs, redoc_url=None)
+app = FastAPI(
+     title="Lif Authentication Server",
+     description="Official API for Lif Platforms authentication services.",
+     version=__version__,
+     docs_url=enable_dev_docs,
+     redoc_url=None
+)
 
 # Enable CORS
 app.add_middleware(
