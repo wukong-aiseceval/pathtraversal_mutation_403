@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse, JSONResponse
 import os
 import yaml
 import json
+from _version import __version__
 from utils import db_interface as database
 from utils import password_hasher as hasher
 from utils import email_checker as email_interface
