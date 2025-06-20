@@ -4,7 +4,7 @@ import uuid
 import mysql.connector
 
 # Global database connection
-conn = None
+db_connection = None
 
 # Load config.yml
 # Run by the main file after the config checks have been completed
@@ -19,8 +19,8 @@ def load_config():
 def connect_to_database():
     # Handle connecting to the database
     def connect():
-        global conn
-        conn = mysql.connector.connect(
+        global db_connection
+        db_connection = mysql.connector.connect(
             host=configurations['mysql-host'],
             user=configurations['mysql-user'],
             password=configurations['mysql-password'],
@@ -28,11 +28,11 @@ def connect_to_database():
         )
     
     # Check if there is a MySQL connection
-    if conn is None:
+    if db_connection is None:
         connect()
     else:
         # Check if existing connection is still alive
-        if not conn.is_connected():
+        if not db_connection.is_connected():
             connect()
 
 # Function for verifying user credentials
@@ -42,7 +42,7 @@ def verify_credentials(username, password):
     
     else:
         connect_to_database()
-        cursor = conn.cursor()
+        cursor = db_connection.cursor()
 
         # Gets all accounts from the MySQL database
         cursor.execute("SELECT * FROM accounts")
@@ -69,7 +69,7 @@ def verify_credentials(username, password):
 
 def get_password_salt(username):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     # Gets the salt for the given username from the MySQL database
     cursor.execute("SELECT salt FROM accounts WHERE username = %s", (username,))
@@ -84,7 +84,7 @@ def get_password_salt(username):
 
 def retrieve_user_token(username):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     # Gets all accounts from the MySQL database
     cursor.execute("SELECT * FROM accounts")
@@ -107,7 +107,7 @@ def retrieve_user_token(username):
 
 def check_username(username):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     # Gets all accounts from the MySQL database
     cursor.execute("SELECT * FROM accounts WHERE username = %s", (username,))
@@ -126,7 +126,7 @@ def check_username(username):
 
 def check_email(email):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     found_email = False
 
@@ -147,7 +147,7 @@ def create_account(username, email, password, password_salt):
     connect_to_database()
 
     # Define database cursor
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     # Generate user token
     token = str(secrets.token_hex(16 // 2))
@@ -158,12 +158,12 @@ def create_account(username, email, password, password_salt):
     cursor.execute("INSERT INTO accounts (username, password, email, token, salt, bio, pronouns, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                    (username, password, email, token, password_salt, None, None, user_id))
 
-    conn.commit()
+    db_connection.commit()
     cursor.close()
 
 def check_token(username: str, token: str):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     # Gets all accounts from the MySQL database
     cursor.execute("SELECT * FROM accounts")
@@ -182,27 +182,27 @@ def check_token(username: str, token: str):
 
 def update_user_bio(username, data):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     # Grab user info from database
     cursor.execute("UPDATE accounts SET bio = %s WHERE username = %s", (data, username))
-    conn.commit()
+    db_connection.commit()
 
     return "Ok"
 
 def update_user_pronouns(username, data):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     # Update pronouns in database
     cursor.execute("UPDATE accounts SET pronouns = %s WHERE username = %s", (data, username))
-    conn.commit()
+    db_connection.commit()
 
     return "Ok"
 
 def get_bio(username):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     cursor.execute("SELECT * FROM accounts WHERE username = %s", (username,))
     data = cursor.fetchone()
@@ -211,7 +211,7 @@ def get_bio(username):
 
 def get_pronouns(username):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     cursor.execute("SELECT * FROM accounts WHERE username = %s", (username,))
     data = cursor.fetchone()
@@ -220,23 +220,23 @@ def get_pronouns(username):
 
 def update_user_salt(username: str, salt: str):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     # Update salt in database
     cursor.execute("UPDATE accounts SET salt = %s WHERE username = %s", (salt, username))
-    conn.commit()
+    db_connection.commit()
 
 def update_password(username: str, password: str):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     # Update password in database
     cursor.execute("UPDATE accounts SET password = %s WHERE username = %s", (password, username))
-    conn.commit()
+    db_connection.commit()
 
 def get_user_email(username: str):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     cursor.execute("SELECT * FROM accounts WHERE username = %s", (username,))
     data = cursor.fetchone()
@@ -245,7 +245,7 @@ def get_user_email(username: str):
 
 def get_username(account_id: str):
     connect_to_database()
-    cursor = conn.cursor()
+    cursor = db_connection.cursor()
 
     cursor.execute("SELECT * FROM accounts WHERE user_id = %s", (account_id,))
     data = cursor.fetchone()

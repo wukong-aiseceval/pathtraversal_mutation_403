@@ -11,7 +11,7 @@ import uuid
 import yaml
 
 # Generates a session id
-sessionId = uuid.uuid4()
+session_identifier = uuid.uuid4()
 
 # using now() to get current time
 current_time = datetime.datetime.now()
@@ -29,7 +29,7 @@ with open("src/config.yml", "r") as config:
     configuration = yaml.safe_load(config)
 
 # Creates new log file
-logFile = open(f"{configuration['Path-To-Logs']}/{date}={sessionId}", "a")
+logFile = open(f"{configuration['Path-To-Logs']}/{date}={session_identifier}", "a")
 logFile.close()
 
 # Function for getting the prefix for the logs
@@ -66,7 +66,7 @@ def showInfo(message):
     print(colored(log, "white"))
 
     # Saves the log
-    logFile = open(f"{configuration['Path-To-Logs']}/{date}={sessionId}", "a")
+    logFile = open(f"{configuration['Path-To-Logs']}/{date}={session_identifier}", "a")
     logFile.write(log + "\n")
     logFile.close()
 
@@ -82,7 +82,7 @@ def showWarning(message):
     print(colored(log, "yellow"))
 
     # Saves the log
-    logFile = open(f"{configuration['Path-To-Logs']}/{date}={sessionId}", "a")
+    logFile = open(f"{configuration['Path-To-Logs']}/{date}={session_identifier}", "a")
     logFile.write(log + "\n")
     logFile.close()
 
@@ -98,6 +98,6 @@ def showError(message):
     print(colored(log, "red"))
 
     # Saves the log
-    logFile = open(f"{configuration['Path-To-Logs']}/{date}={sessionId}", "a")
+    logFile = open(f"{configuration['Path-To-Logs']}/{date}={session_identifier}", "a")
     logFile.write(log + "\n")
     logFile.close()

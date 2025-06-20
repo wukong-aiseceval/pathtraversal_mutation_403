@@ -47,12 +47,12 @@ if not os.path.isfile("config.yml"):
 
 with open("config.yml", "r") as config:
     contents = config.read()
-    configurations = yaml.safe_load(contents)
+    config_settings = yaml.safe_load(contents)
     config.close()
 
-# Ensure the configurations are not None
-if configurations == None:
-    configurations = {}
+# Ensure the config_settings are not None
+if config_settings == None:
+    config_settings = {}
 
 # Open reference json file for config
 with open(f"{resources_folder}/json data/default_config.json", "r") as json_file:
@@ -65,13 +65,13 @@ if not os.path.isfile('access-control.yml'):
 
 # Compare config with json data
 for option in default_config:
-    if not option in configurations:
-        configurations[option] = default_config[option]
+    if not option in config_settings:
+        config_settings[option] = default_config[option]
         print(f"Added '{option}' to config!")
 
 # Open config in write mode to write the updated config
 with open("config.yml", "w") as config:
-    new_config = yaml.safe_dump(configurations)
+    new_config = yaml.safe_dump(config_settings)
     config.write(new_config)
     config.close()
 

@@ -12,7 +12,7 @@ from stdiomask import getpass
 import mysql.connector
 
 # Ask for database host/credentials
-db_host = input('Enter Database Host: ')
+database_host = input('Enter Database Host: ')
 db_user = input('Enter Database User: ')
 db_password = getpass('Enter Database Password: ', mask='*')
 db_database = input('Enter Database: ')
@@ -22,7 +22,7 @@ print("Connecting to MySQL...")
 
 try:
     conn = mysql.connector.connect(
-        host=db_host,
+        host=database_host,
         user=db_user,
         password=db_password,
         database=db_database

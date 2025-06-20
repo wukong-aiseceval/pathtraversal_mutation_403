@@ -7,7 +7,7 @@ def is_valid_email(email):
         return False
     
     # Split email into local part and domain part
-    local_part, domain = email.split("@")
+    username_part, domain = email.split("@")
     
     # DNS MX record check
     try:

@@ -12,9 +12,9 @@ def get_hash_with_database_salt(username, password):
         return False  
     else:
         # Adding salt at the last of the password
-        dataBase_password = password+salt
+        salted_password = password+salt
         # Encoding the password
-        hashed = hashlib.sha256(dataBase_password.encode())
+        hashed = hashlib.sha256(salted_password.encode())
         
         # Returns the password hash 
         return hashed.hexdigest()
